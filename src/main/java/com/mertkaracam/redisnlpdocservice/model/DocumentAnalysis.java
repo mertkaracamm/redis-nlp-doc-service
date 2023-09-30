@@ -8,6 +8,8 @@ public class DocumentAnalysis implements Serializable {
     private String documentId;
     private String content;
     private String analysisResult;
+    private byte[] fileData;
+    private String fileType;
 
     public DocumentAnalysis() {}
 
@@ -39,5 +41,21 @@ public class DocumentAnalysis implements Serializable {
 
     public void setAnalysisResult(String analysisResult) {
         this.analysisResult = analysisResult;
+    }
+
+    public byte[] getFileData() {
+        return fileData;
+    }
+
+    public void setFileData(byte[] fileData) {
+        this.fileData = fileData;
+    }
+
+    public String getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(String fileType) {
+        this.fileType = fileType;
     }
 }
