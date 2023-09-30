@@ -1,34 +1,24 @@
 package com.mertkaracam.redisnlpdocservice.controller;
 
-import com.mertkaracam.redisnlpdocservice.model.Document;
-import com.mertkaracam.redisnlpdocservice.service.DocumentService;
+import com.mertkaracam.redisnlpdocservice.model.DocumentAnalysis;
+import com.mertkaracam.redisnlpdocservice.service.DocumentAnalysisService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/documents")
+@RequestMapping("/api/documents")
 public class DocumentController {
-    private final DocumentService documentService;
 
     @Autowired
-    public DocumentController(DocumentService documentService) {
-        this.documentService = documentService;
-    }
+    private DocumentAnalysisService service;
 
-    @PostMapping
-    public ResponseEntity<Document> createDocument(@RequestBody Document document) {
-        Document savedDocument = documentService.save(document);
-        return ResponseEntity.ok(savedDocument);
+    @PostMapping("/analyze")
+    public DocumentAnalysis analyzeAndSave(@RequestBody String content) {
+        return service.analyzeAndSave(content);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Document> getDocument(@PathVariable Long id) {
-        Document document = documentService.findById(id);
-        if (document != null) {
-            return ResponseEntity.ok(document);
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public DocumentAnalysis findById(@PathVariable String id) {
+        return service.findById(id);
     }
 }
