@@ -2,6 +2,7 @@ package com.mertkaracam.redisnlpdocservice.service;
 
 import com.mertkaracam.redisnlpdocservice.model.DocumentAnalysis;
 import com.mertkaracam.redisnlpdocservice.repository.DocumentAnalysisRepository;
+import com.mertkaracam.redisnlpdocservice.util.PDFUtil;
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.namefind.TokenNameFinderModel;
 import opennlp.tools.tokenize.TokenizerME;
@@ -21,7 +22,16 @@ public class DocumentAnalysisService {
     private DocumentAnalysisRepository repository;
 
     public DocumentAnalysis analyzeAndSaveWithFile(DocumentAnalysis analysis) {
-        String content = new String(analysis.getFileData());
+        String content;
+        if (analysis.getFileType().equalsIgnoreCase("pdf")) {
+            try {
+                content = PDFUtil.extractTextFromPDF(analysis.getFileData());
+            } catch (IOException e) {
+                throw new RuntimeException("PDF dosyasından metin çıkarılırken bir hata oluştu.", e);
+            }
+        } else {
+            content = new String(analysis.getFileData());
+        }
 
         try {
             InputStream tokenModelIn = Thread.currentThread().getContextClassLoader().getResourceAsStream("models/en-token.bin");
