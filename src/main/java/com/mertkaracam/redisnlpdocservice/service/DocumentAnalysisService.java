@@ -24,20 +24,17 @@ public class DocumentAnalysisService {
         String content = new String(analysis.getFileData());
 
         try {
-            // Tokenizasyon
-        	InputStream tokenModelIn = Thread.currentThread().getContextClassLoader().getResourceAsStream("models/en-token.bin");
+            InputStream tokenModelIn = Thread.currentThread().getContextClassLoader().getResourceAsStream("models/en-token.bin");
             TokenizerModel tokenModel = new TokenizerModel(tokenModelIn);
             TokenizerME tokenizer = new TokenizerME(tokenModel);
             String[] tokens = tokenizer.tokenize(content);
 
-            // Named Entity Recognition (NER)
             InputStream nameModelIn = Thread.currentThread().getContextClassLoader().getResourceAsStream("models/en-ner-person.bin");
             TokenNameFinderModel nameModel = new TokenNameFinderModel(nameModelIn);
             NameFinderME nameFinder = new NameFinderME(nameModel);
             Span[] nameSpans = nameFinder.find(tokens);
             String[] names = Arrays.stream(nameSpans).map(span -> tokens[span.getStart()]).toArray(String[]::new);
 
-            // Analiz sonuçlarını birleştirme
             StringBuilder analysisResult = new StringBuilder();
             analysisResult.append("Kelimeler: ").append(String.join(", ", tokens)).append("\n");
             analysisResult.append("İsimler: ").append(String.join(", ", names)).append("\n");
