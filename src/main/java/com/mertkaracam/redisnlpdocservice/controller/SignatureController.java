@@ -1,37 +1,28 @@
 package com.mertkaracam.redisnlpdocservice.controller;
 
+import com.mertkaracam.redisnlpdocservice.service.SignatureVerificationService;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.mertkaracam.redisnlpdocservice.service.SignatureVerificationService;
 
 @RestController
+@RequestMapping("/api/signature")
 public class SignatureController {
-
     @Autowired
-    private SignatureVerificationService verificationService;
+    private SignatureVerificationService signatureVerificationService;
 
-    public SignatureController(SignatureVerificationService verificationService) {
-        this.verificationService = verificationService;
-    }
-
-    @PostMapping("/verify-signature")
-    public ResponseEntity<String> verifySignature(@RequestParam("file") MultipartFile file) {
+    @PostMapping("/verify")
+    public boolean verifySignature(@RequestParam("pdfBytes") byte[] pdfBytes) {
         try {
-            byte[] pdfContent = file.getBytes();
-            boolean isVerified = verificationService.verifyDocumentSignature(pdfContent);
-
-            if (isVerified) {
-                return ResponseEntity.ok("İmza doğrulandı!");
-            } else {
-                return ResponseEntity.badRequest().body("İmza doğrulanamadı!");
-            }
+            PDDocument document = PDDocument.load(pdfBytes);
+            return signatureVerificationService.verifySignature(document);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Bir hata oluştu: " + e.getMessage());
+            // Hata durumunda false döndür ve hatayı logla
+            e.printStackTrace();
+            return false;
         }
     }
 }

@@ -1,36 +1,44 @@
 package com.mertkaracam.redisnlpdocservice.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateFactory;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.List;
+
 @Service
 public class SignatureVerificationService {
 
-    public boolean verifyDocumentSignature(byte[] pdfContent) {
-        try (PDDocument document = PDDocument.load(pdfContent)) {
-            PDSignature signature = document.getLastSignatureDictionary();
-            if (signature == null) {
-                return false; // Belgede imza bulunamadı
+    public boolean verifySignature(PDDocument document) {
+        try {
+            List<PDSignature> signatures = document.getSignatureDictionaries();
+
+            if (signatures == null || signatures.isEmpty()) {
+                return false;
             }
 
-            CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            InputStream inStream = new ByteArrayInputStream(signature.getContents());
-            Certificate certificate = factory.generateCertificate(inStream);
-            PublicKey publicKey = certificate.getPublicKey();
+            for (PDSignature signature : signatures) {
+                // İmza verilerini al
+                byte[] signatureBytes = signature.getSignature();
+                byte[] signedContent = signature.getSignedContent(document);
+                
+                // İmza doğrulama işlemi
+                CertificateFactory factory = CertificateFactory.getInstance("X.509");
+                Certificate certificate = factory.generateCertificate(signature.getCOSObject().getAsStream());
+                X509Certificate x509Certificate = (X509Certificate) certificate;
+                signature.verifySignature(signedContent, signatureBytes);
 
-            // İmza doğrulama işlemi
-            Signature sig = Signature.getInstance("SHA256withRSA");
-            sig.initVerify(publicKey);
-            sig.update(signature.getSignedContent(pdfContent));
+                // İmza doğrulandıysa true döndür
+                if (x509Certificate != null) {
+                    return true;
+                }
+            }
 
-            return sig.verify(signature.getContents());
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
