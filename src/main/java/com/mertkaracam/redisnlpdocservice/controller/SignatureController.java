@@ -15,14 +15,17 @@ public class SignatureController {
     private SignatureVerificationService signatureVerificationService;
 
     @PostMapping("/verify")
-    public boolean verifySignature(@RequestParam("pdfBytes") byte[] pdfBytes) {
+    public String verifySignature(@RequestParam("pdfBytes") byte[] pdfBytes) {
         try {
             PDDocument document = PDDocument.load(pdfBytes);
-            return signatureVerificationService.verifySignature(document);
+            boolean isVerified = signatureVerificationService.verifySignature(document);
+            if (isVerified) {
+                return "Imza doğrulandı.";
+            } else {
+                return "Imza doğrulanamadı.";
+            }
         } catch (Exception e) {
-            // Hata durumunda false döndür ve hatayı logla
-            e.printStackTrace();
-            return false;
+            return "Hata: " + e.getMessage();
         }
     }
 }
