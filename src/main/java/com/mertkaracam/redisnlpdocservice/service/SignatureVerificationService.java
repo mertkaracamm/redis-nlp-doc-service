@@ -2,6 +2,7 @@ package com.mertkaracam.redisnlpdocservice.service;
 
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.interactive.digitalsignature.PDSignature;
+import org.apache.pdfbox.pdmodel.interactive.digitalsignature.SignatureInterface;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -17,9 +18,9 @@ public class SignatureVerificationService {
 
     public boolean verifySignature(PDDocument document) {
         try {
-            List<PDSignature> signatures = document.getSignatureDictionaries();
-
-            if (signatures == null || signatures.isEmpty()) {
+            SignatureInterface signatureInterface = document.getSignature();
+            if (signatureInterface == null) {
+                System.out.println("Belgede imza bilgisi bulunamadı.");
                 return false;
             }
 
@@ -27,16 +28,14 @@ public class SignatureVerificationService {
             document.save(byteArrayOutputStream);
             InputStream documentInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
 
-            for (PDSignature signature : signatures) {
-                InputStream signedContentStream = new ByteArrayInputStream(signature.getContents(documentInputStream));
+            InputStream signedContentStream = new ByteArrayInputStream(signatureInterface.getContents(documentInputStream));
                 
-                CertificateFactory factory = CertificateFactory.getInstance("X.509");
-                Certificate certificate = factory.generateCertificate(signedContentStream);
-                X509Certificate x509Certificate = (X509Certificate) certificate;
+            CertificateFactory factory = CertificateFactory.getInstance("X.509");
+            Certificate certificate = factory.generateCertificate(signedContentStream);
+            X509Certificate x509Certificate = (X509Certificate) certificate;
                 
-                if (x509Certificate != null && isValidCertificate(x509Certificate)) {
-                    return true;
-                }
+            if (x509Certificate != null && isValidCertificate(x509Certificate)) {
+                return true;
             }
 
             return false;
@@ -48,7 +47,7 @@ public class SignatureVerificationService {
 
     private boolean isValidCertificate(X509Certificate certificate) {
         try {
-            certificate.checkValidity(); // Bu metot, sertifikanın geçerli olup olmadığını kontrol eder.
+            certificate.checkValidity();
             return true;
         } catch (Exception e) {
             return false;
