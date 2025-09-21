@@ -60,10 +60,10 @@ Response:
 ## Next Steps
 In the future, I want to evolve this service into something more powerful by combining Redis with large language models (LLMs). The direction I’m exploring is **Automating Document Approvals with LLM-Based Rule Engines**.
 
-The idea is to replace manual document approval processes, where external parties currently review and validate 10–20 financial or legal documents by hand. These reviews check for compliance with rules like presence of names, dates, digital signatures, or specific wording — a process that is slow, error-prone, and inconsistent.
+The idea is to replace manual document approval processes, where external parties currently review and validate 10–20 financial or legal documents by hand. These reviews check for compliance with rules like presence of names, dates, digital signatures, or specific wording a process that is slow, error-prone, and inconsistent.
 
 To address this, I designed a system that:
-- Uses an LLM (e.g. GPT-4) to parse document content (PDF → text).  
+- Uses an LLM (e.g. GPT-5) to parse document content (PDF → text).  
 - Evaluates the content against user-defined rule sets (e.g. “Document must contain a signature block and approval clause”).  
 - Returns structured outputs such as:
 ```json
@@ -80,5 +80,3 @@ On top of the LLM prompts, a **rule-engine layer** defines conditions such as:
 Planned extensions include:
 - Redis integration for caching evaluations.  
 - REST API hooks into a document management system for automated workflows.  
-
-This project is still evolving, but seeing how a language model can reason over semi-structured documents and deliver consistent, auditable decisions has been both exciting and impactful.
